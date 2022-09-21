@@ -1,7 +1,9 @@
 import React, { useMemo } from "react";
 import ArrowLeft from "~/svg-components/arrow-left";
 import styled from "styled-components";
-import { Link, useLoaderData } from "@remix-run/react";
+import { Link } from "@remix-run/react";
+import type { PreviewItemType } from "./recomended-list";
+import Button from "./button";
 
 export const Container = styled.div`
   display: flex;
@@ -22,40 +24,55 @@ export const CurrentPage = styled.p`
   line-height: 1.19rem;
 `;
 
-const Pagination = () => {
-  const {
-    data: {
-      data,
-      pagination: { current_page },
-    },
-  } = useLoaderData();
+interface PaginationProps {
+  currentPage: number;
+  hasNextPage: boolean;
+  posts: PreviewItemType[];
+}
 
+const Pagination: React.FC<PaginationProps> = ({
+  currentPage,
+  posts,
+  hasNextPage,
+}) => {
   const pagination = useMemo(() => {
-    const previousPage = current_page - 1 || 1;
-    const nextPage = current_page + 1;
+    const previousPage = currentPage - 1 || 1;
+    const nextPage = currentPage + 1;
 
     const pagination = {
       previous: {
-        disabled: current_page === 1,
+        disabled: currentPage === 1,
         link: `/?page=${previousPage}`,
       },
       next: {
-        disabled: data && !data.length, // or some empty state indicator
+        disabled: posts && !posts.length, // or some empty state indicator
         link: `/?page=${nextPage}`,
       },
     };
 
     return pagination;
-  }, [current_page]);
+  }, [currentPage]);
 
   return (
     <Container>
       <Link to={pagination.previous.link}>
-        <ArrowLeft />
+        <Button
+          handleClick={() => console.log(currentPage)}
+          isDisabled={currentPage === 1}
+          direction="left"
+        >
+          <ArrowLeft />
+        </Button>
       </Link>
-      <CurrentPage>{current_page}</CurrentPage>
+      <CurrentPage>{currentPage}</CurrentPage>
       <Link to={pagination.next.link}>
-        <ArrowRight />
+        <Button
+          handleClick={() => console.log(currentPage)}
+          isDisabled={!hasNextPage}
+          direction="left"
+        >
+          <ArrowRight />
+        </Button>
       </Link>
     </Container>
   );

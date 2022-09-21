@@ -1,3 +1,4 @@
+import { Link } from "@remix-run/react";
 import styled from "styled-components";
 import breakpoints from "~/constans/breakpoints";
 import wrapperStyle from "~/styles/wrapper-style";
@@ -89,11 +90,13 @@ const RecommendedList: React.FC<RecommendedListProps> = ({ items }) => {
     <Container>
       <Grid>
         {items.map((item) => (
-          <Content key={item.mal_id}>
-            <BackgroundOverlay />
-            <img src={item.images.webp.image_url} alt="preview" />
-            <Title>{item.title}</Title>
-          </Content>
+          <Link to={`/${item.mal_id}`} key={item.mal_id}>
+            <Content key={item.mal_id}>
+              <BackgroundOverlay />
+              <img src={item.images.webp.image_url} alt="preview" />
+              <Title>{item.title}</Title>
+            </Content>
+          </Link>
         ))}
       </Grid>
     </Container>
