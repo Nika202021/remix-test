@@ -1,9 +1,10 @@
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import breakpoints from "~/constans/breakpoints";
 import wrapperStyle from "~/styles/wrapper-style";
-import imageIcon from "~/images/main.jpg";
 import SimpleArrow from "~/svg-components/simple-arrow";
 import TickMark from "~/svg-components/tick-mark";
+import GlobalStyle from "./global-style";
+import { Link } from "@remix-run/react";
 
 export const Container = styled.div`
   ${wrapperStyle};
@@ -17,7 +18,17 @@ export const LinkContainer = styled.div`
   cursor: pointer;
 `;
 
-export const StyledHref = styled.a`
+const borderAnimation = keyframes`
+  0%{
+    width: 0%;
+  }
+  100%{
+    width: 100%;
+  }
+`;
+
+export const StyledLink = styled(Link)`
+  position: relative;
   margin: 0 0 0 1rem;
   color: var(--blackColor);
   font-family: var(--mainFont);
@@ -25,6 +36,19 @@ export const StyledHref = styled.a`
   font-weight: 600;
   line-height: 1.21rem;
   text-decoration: none;
+  transition: all 0.3s;
+
+  &:hover {
+    &:before {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 0;
+      border-bottom: 1px solid var(--blackColor);
+      animation: ${borderAnimation} 0.3s linear forwards;
+    }
+  }
 `;
 
 export const Content = styled.div`
@@ -139,6 +163,28 @@ export const Arrow = styled(SimpleArrow)`
   transform: rotate(270deg);
 `;
 
+export interface PostType {
+  mal_id: number;
+  title: string;
+  status: string;
+  source: string;
+  episodes: number;
+  synopsis: string;
+  score: number;
+  rank: number;
+  popularity: number;
+  type: string;
+  images: {
+    webp: {
+      image_url: string;
+    };
+  };
+}
+
+export interface PostProps {
+  data: PostType;
+}
+
 export interface SourceTypeProps {
   title: string;
   description: string | number;
@@ -159,41 +205,49 @@ export const RankType = ({ title, description }: SourceTypeProps) => (
   </div>
 );
 
-const PostSinglePage = () => {
+const PostSinglePage: React.FC<PostProps> = ({ data }) => {
   return (
     <>
+      <GlobalStyle />
       <Container>
         <LinkContainer>
           <Arrow />
-          {/* <Link to="/">
-            <StyledHref>Go back to main</StyledHref>
-          </Link> */}
+          <StyledLink to="/">Go back to main</StyledLink>
         </LinkContainer>
         <Content>
           <ImageContainer>
-            <img src={imageIcon} alt="preview" />
+            {data.images.webp.image_url && (
+              <img src={data.images.webp.image_url} alt="preview" />
+            )}
           </ImageContainer>
           <MovieTypeContent>
             <TitleContainer>
-              <Title>title</Title>
+              {data.title && <Title>{data.title}</Title>}
               <IconContainer>
                 <TickMark />
               </IconContainer>
             </TitleContainer>
-            <SourceType title="Type" description="Movie" />
-
-            <SourceType title="Source" description="sourse" />
-            <SourceType title="Episodes" description="episodes" />
-            <SourceType title="Status" description="status" />
-            <RankContainer>
-              <RankType title="Score" description="score" />
-              <RankType title="Rank" description="rank" />
-              <RankType title="Popularity" description="popularity" />
-            </RankContainer>
+            {data.type && <SourceType title="Type" description={data.type} />}
+            {data.source && (
+              <SourceType title="Source" description={data.source} />
+            )}
+            {data.episodes && (
+              <SourceType title="Episodes" description={data.episodes} />
+            )}
+            {data.status && (
+              <SourceType title="Status" description={data.status} />
+            )}
+            {data.score && data.rank && data.popularity && (
+              <RankContainer>
+                <RankType title="Score" description={data.score} />
+                <RankType title="Rank" description={data.rank} />
+                <RankType title="Popularity" description={data.popularity} />
+              </RankContainer>
+            )}
           </MovieTypeContent>
         </Content>
         <TypeDescription>Description</TypeDescription>
-        <Description>data.synopsis</Description>
+        {data.synopsis && <Description>{data.synopsis}</Description>}
       </Container>
     </>
   );

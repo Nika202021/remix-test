@@ -1,13 +1,21 @@
 import { useLoaderData } from "@remix-run/react";
 import Pagination from "./pagination";
-import PostSinglePage from "./post-single-page";
 import RecommendedList from "./recomended-list";
-import { json } from "@remix-run/node";
+import type { LoaderFunction } from "@remix-run/node";
 import { getAnime } from "~/models/anime.server";
+import Layout from "./layout";
 
 export interface PreviewItemType {
   mal_id: number;
   title: string;
+  status: string;
+  source: string;
+  episodes: number;
+  synopsis: string;
+  score: number;
+  rank: number;
+  popularity: number;
+  type: string;
   images: {
     webp: {
       image_url: string;
@@ -15,28 +23,28 @@ export interface PreviewItemType {
   };
 }
 
-type LoaderData = {
-  data: Awaited<ReturnType<typeof getAnime>>;
-};
+export const loader: LoaderFunction = async ({ request }) => {
+  const url = new URL(request.url);
+  const page = url.searchParams.get("page") || 1;
+  const posts = await getAnime(page);
 
-export const loader = async () => {
-  return json<LoaderData>({
-    data: await getAnime(),
-  });
+  return {
+    posts,
+    currentPage: page,
+  };
 };
 
 const Home = () => {
-  const {
-    data: { data, pagination },
-  } = useLoaderData();
-  console.log(pagination);
+  const data = useLoaderData();
   return (
-    <>
-      <h1>Hello</h1>
-      <RecommendedList items={data} />
-      <Pagination />
-      <PostSinglePage />
-    </>
+    <Layout>
+      <RecommendedList items={data.posts.data} />
+      <Pagination
+        currentPage={data.posts.pagination.current_page}
+        posts={data.posts.data}
+        hasNextPage={data.posts.pagination.has_next_page}
+      />
+    </Layout>
   );
 };
 
